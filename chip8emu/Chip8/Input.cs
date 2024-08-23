@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace chip8emu.Chip8
@@ -14,5 +15,10 @@ namespace chip8emu.Chip8
         {
 			Key = new byte[16];
         }
+
+		public void Clear()
+		{
+			Array.Clear(Key, 0, 16);
+		}
     }
 }

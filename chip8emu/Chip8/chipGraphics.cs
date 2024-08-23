@@ -28,7 +28,6 @@ namespace chip8emu.Chip8
 
 		public Bitmap GetBitmap()
 		{
-			// Create a new bitmap with the original dimensions
 			Bitmap originalBitmap = new Bitmap(DisplayWidth, DisplayHeight);
 
 			for (int y = 0; y < DisplayHeight; y++)

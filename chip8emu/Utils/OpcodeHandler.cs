@@ -328,33 +328,43 @@ namespace chip8emu.Utils
 		{
 			byte xIndex = (byte)((cpu.Opcode & 0x0F00) >> 8);
 			byte yIndex = (byte)((cpu.Opcode & 0x00F0) >> 4);
-			byte height = (byte)((cpu.Opcode & 0x000F));
+			byte height = (byte)(cpu.Opcode & 0x000F);
 			byte x = cpu.V[xIndex];
 			byte y = cpu.V[yIndex];
 			byte pixel;
 
 			cpu.V[0xF] = 0;
 
-			for(int yLine = 0; yLine < height; yLine++)
+			for (int yLine = 0; yLine < height; yLine++)
 			{
 				pixel = cpu.Memory[cpu.I + yLine];
 
-				for(int xLine = 0; xLine < 8; xLine++)
+				for (int xLine = 0; xLine < 8; xLine++)
 				{
-					if ((pixel & (0x80 >> xLine)) != 0)
-					{
-						if (cpu.Graphics.gfx[(x + xLine + ((y + yLine) * 64))] == 1)
-						{
-							cpu.V[0xF] = 1;
-						}
+					int drawX = x + xLine;
+					int drawY = y + yLine;
 
-						cpu.Graphics.gfx[x + xLine + ((y + yLine) * 64)] ^= 1;
+					if (drawX >= 0 && drawX < 64 && drawY >= 0 && drawY < 32)
+					{
+						if ((pixel & (0x80 >> xLine)) != 0)
+						{
+							int pos = drawX + drawY * 64;
+
+							if (cpu.Graphics.gfx[pos] == 1)
+							{
+								cpu.V[0xF] = 1;
+							}
+
+							cpu.Graphics.gfx[pos] ^= 1;
+						}
 					}
 				}
 			}
-			cpu.DrawFlag = true; 
+
+			cpu.DrawFlag = true;
 			cpu.pc += 2;
 		}
+
 
 		//CXNN
 		private void setVXtoRandomAndNN()
@@ -375,14 +385,14 @@ namespace chip8emu.Utils
 		//BNNN
 		private void jumpToAddressNNNplusV0()
 		{
-			byte address = (byte)((cpu.Opcode & 0x0FFF));
+			ushort address = (ushort)((cpu.Opcode & 0x0FFF));
 			cpu.pc = (ushort)(address + cpu.V[0x0]);
 		}
 
 		//ANNN
 		private void setItoAddressNNN()
 		{
-			byte address = (byte)((cpu.Opcode & 0x0FFF));
+			ushort address = (ushort)((cpu.Opcode & 0x0FFF));
 			cpu.I = address;
 			cpu.pc += 2;
 		}
@@ -543,6 +553,7 @@ namespace chip8emu.Utils
 			{
 				cpu.V[xIndex] += nnValue;
 			}
+
 			cpu.pc += 2;
 		}
 
@@ -579,6 +590,11 @@ namespace chip8emu.Utils
 				{
 					cpu.pc += 2;
 				}
+			}
+			else
+			{
+				Console.WriteLine($"Invalid register index: {xIndex}");
+				cpu.pc += 2;
 			}
 		}
 
@@ -635,7 +651,9 @@ namespace chip8emu.Utils
 				cpu.sp--;
 				cpu.pc = cpu.Stack[cpu.sp];
 			}
-			
+
+			cpu.pc += 2;
+		
 		}
 
 		//00E0
